@@ -1,5 +1,17 @@
 [
   {
+    "type": "constructor",
+    "name": "__init__",
+    "inputs": [
+      {
+        "name": "onlySplitAfterLocked",
+        "type": "bool"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
     "type": "function",
     "name": "addAddress",
     "inputs": [
