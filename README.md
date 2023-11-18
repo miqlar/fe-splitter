@@ -117,11 +117,15 @@ cast balance 0x0000000000000000000000000000000000000002
 ```
 
 We can remove an address (the second one for example):
+```
 cast send $SPLITTER_CONTRACT "removeAddress(address)" 0x0000000000000000000000000000000000000001 --mnemonic $MNEMONIC --mnemonic-index 0
+```
 
 And check the N beneficiaries again:
+```
 cast call $SPLITTER_CONTRACT "getNumberBeneficiaries()"
 > 0x0000000000000000000000000000000000000002
+```
 
 
 
