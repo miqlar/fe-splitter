@@ -1,8 +1,8 @@
 use erc20_token::ERC20
 
 struct Beneficiary {
-	pub addr: address
-	pub share: u256
+  pub addr: address
+  pub share: u256
 }
 
 contract Splitter {
@@ -26,20 +26,20 @@ contract Splitter {
     // Add address as beneficiary with designated share
     assert ctx.msg_sender() == self._owner
     assert not self._locked
-	  assert self._beneficiaryAddressToIndex[addr] == 0 
+    assert self._beneficiaryAddressToIndex[addr] == 0 
 
     // We use the index>0 to register, because mapping of an index==0 will mean unitialized
-	  self._beneficiaryCounter += 1
+    self._beneficiaryCounter += 1
     self._beneficiaryAddressToIndex[addr] = self._beneficiaryCounter
-	  self._beneficiaries[self._beneficiaryCounter] = Beneficiary(addr:addr, share:share)
-	  self._shareSum+=share
+    self._beneficiaries[self._beneficiaryCounter] = Beneficiary(addr:addr, share:share)
+    self._shareSum+=share
   }
 
   pub fn updateShareForAddress(mut self, ctx: Context, addr:address, newShare:u256){
     // Update the share for an address
     assert ctx.msg_sender() == self._owner
     assert not self._locked
-	  assert self._beneficiaryAddressToIndex[addr] != 0 
+    assert self._beneficiaryAddressToIndex[addr] != 0 
 
     self._beneficiaries[self._beneficiaryAddressToIndex[addr]].share = newShare
   }
@@ -48,17 +48,17 @@ contract Splitter {
     // Remove an address as beneficiary
     assert ctx.msg_sender() == self._owner
     assert not self._locked
-	  assert self._beneficiaryAddressToIndex[addr] != 0 
+    assert self._beneficiaryAddressToIndex[addr] != 0 
 
     let index: u256 = self._beneficiaryAddressToIndex[addr]
-	  if index != self._beneficiaryCounter{
+    if index != self._beneficiaryCounter{
       // If the address to remove is not that last one, we put the last one to replace that spot in _beneficiaries
       // This is done so we can iterate cleanly through the indexes>0 when splitting
       let lastBeneficiary: Beneficiary = self._beneficiaries[self._beneficiaryCounter].to_mem()
       self._beneficiaries[index] = lastBeneficiary
       self._beneficiaryAddressToIndex[lastBeneficiary.addr] = index
-	  }
-	  self._beneficiaryCounter -= 1
+    }
+    self._beneficiaryCounter -= 1
     self._beneficiaryAddressToIndex[addr] = 0
   }
   
@@ -73,14 +73,14 @@ contract Splitter {
     assert (self._onlySplitAfterLocked and self._locked) or (not self._onlySplitAfterLocked)
     assert self._lockUntilTimestamp < ctx.block_timestamp()
 
-		let initBalance: u256 = ctx.balance_of(ctx.self_address())
+    let initBalance: u256 = ctx.balance_of(ctx.self_address())
 
-		let mut i: u256 = 1
-		while i<self._beneficiaryCounter {
-			ctx.send_value(to: self._beneficiaries[i].addr, wei: self._beneficiaries[i].share*initBalance/self._shareSum)
+    let mut i: u256 = 1
+    while i<self._beneficiaryCounter {
+      ctx.send_value(to: self._beneficiaries[i].addr, wei: self._beneficiaries[i].share*initBalance/self._shareSum)
       i+=1
-		}
-		ctx.send_value(to: self._beneficiaries[i].addr, wei: ctx.balance_of(ctx.self_address()))
+    }
+    ctx.send_value(to: self._beneficiaries[i].addr, wei: ctx.balance_of(ctx.self_address()))
   }
 
 
@@ -89,15 +89,15 @@ contract Splitter {
     assert (self._onlySplitAfterLocked and self._locked) or (not self._onlySplitAfterLocked)
     assert self._lockUntilTimestamp < ctx.block_timestamp()
 
-		let mut token:ERC20 = ERC20(tokenAddress)
-		let initTokens: u256 = token.balanceOf(ctx.self_address())
+    let mut token:ERC20 = ERC20(tokenAddress)
+    let initTokens: u256 = token.balanceOf(ctx.self_address())
 
-		let mut i: u256 = 1
-		while i<self._beneficiaryCounter {
-			token.transfer(ctx, recipient: self._beneficiaries[i].addr, value:self._beneficiaries[i].share * initTokens / self._shareSum)
-			i+=1
-		}
-		token.transfer(ctx, recipient: self._beneficiaries[i].addr, value: token.balanceOf(ctx.self_address()))
+    let mut i: u256 = 1
+    while i<self._beneficiaryCounter {
+      token.transfer(ctx, recipient: self._beneficiaries[i].addr, value:self._beneficiaries[i].share * initTokens / self._shareSum)
+      i+=1
+    }
+    token.transfer(ctx, recipient: self._beneficiaries[i].addr, value: token.balanceOf(ctx.self_address()))
   }
 
   pub fn checkIfEqualSplit(self) -> bool {
@@ -105,15 +105,15 @@ contract Splitter {
     if self._beneficiaryCounter==1{
       return true
     }
-		let mut i: u256 = 1
-		let mut equalFlag: bool = true
-		while i<=self._beneficiaryCounter and equalFlag==true {
-			if self._beneficiaries[i].share != self._beneficiaries[i+1].share{
+    let mut i: u256 = 1
+    let mut equalFlag: bool = true
+    while i<=self._beneficiaryCounter and equalFlag==true {
+      if self._beneficiaries[i].share != self._beneficiaries[i+1].share{
         equalFlag = false
       }
-			i+=1
-		}
-		return equalFlag
+      i+=1
+    }
+    return equalFlag
   }
 
   pub fn getNumberBeneficiaries(self) -> u256 {
