@@ -33,6 +33,22 @@
   },
   {
     "type": "function",
+    "name": "updateShareForAddress",
+    "inputs": [
+      {
+        "name": "addr",
+        "type": "address"
+      },
+      {
+        "name": "newShare",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
     "name": "removeAddress",
     "inputs": [
       {
@@ -95,34 +111,17 @@
   },
   {
     "type": "function",
-    "name": "getBeneficiaryInfoAddress",
+    "name": "getIfAddressIsRegistered",
     "inputs": [
       {
-        "name": "index",
-        "type": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
+        "name": "addr",
         "type": "address"
       }
     ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getBeneficiaryInfoShare",
-    "inputs": [
-      {
-        "name": "index",
-        "type": "uint256"
-      }
-    ],
     "outputs": [
       {
         "name": "",
-        "type": "uint256"
+        "type": "bool"
       }
     ],
     "stateMutability": "view"
