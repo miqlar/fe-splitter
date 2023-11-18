@@ -8,7 +8,7 @@
         "type": "bool"
       },
       {
-        "name": "timestampLock",
+        "name": "lockUntilTimestamp",
         "type": "uint256"
       }
     ],
@@ -36,8 +36,8 @@
     "name": "removeAddress",
     "inputs": [
       {
-        "name": "i",
-        "type": "uint256"
+        "name": "addr",
+        "type": "address"
       }
     ],
     "outputs": [],
@@ -77,6 +77,52 @@
       {
         "name": "",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getNumberBeneficiaries",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getBeneficiaryInfoAddress",
+    "inputs": [
+      {
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getBeneficiaryInfoShare",
+    "inputs": [
+      {
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view"

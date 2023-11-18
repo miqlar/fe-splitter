@@ -9,6 +9,7 @@ contract Splitter {
 
   _beneficiaries: Map<u256, Beneficiary>
   _beneficiaryCounter: u256
+  _beneficiaryAddressToIndex: Map<address, u256>
   _shareSum: u256
   _locked: bool
   _onlySplitAfterLocked: bool
@@ -24,22 +25,27 @@ contract Splitter {
   pub fn addAddress(mut self, ctx: Context, addr: address, share: u256) {
     assert ctx.msg_sender() == self._owner
     assert not self._locked
+	  assert self._beneficiaryAddressToIndex[addr] == 0 
 
 	  self._beneficiaryCounter += 1
+    self._beneficiaryAddressToIndex[addr] = self._beneficiaryCounter
 	  self._beneficiaries[self._beneficiaryCounter] = Beneficiary(addr:addr, share:share)
 	  self._shareSum+=share
   }
 
-  pub fn removeAddress(mut self, ctx: Context, i: u256) {
+  pub fn removeAddress(mut self, ctx: Context, addr: address) {
     assert ctx.msg_sender() == self._owner
     assert not self._locked
-	  assert i <= self._beneficiaryCounter 
+	  assert self._beneficiaryAddressToIndex[addr] != 0 
 
-	  if i!=self._beneficiaryCounter{
-      let lastAddress: Beneficiary = self._beneficiaries[self._beneficiaryCounter].to_mem()
-      self._beneficiaries[i] = lastAddress
+    let index: u256 = self._beneficiaryAddressToIndex[addr]
+	  if index != self._beneficiaryCounter{
+      let lastBeneficiary: Beneficiary = self._beneficiaries[self._beneficiaryCounter].to_mem()
+      self._beneficiaries[index] = lastBeneficiary
+      self._beneficiaryAddressToIndex[lastBeneficiary.addr] = index
 	  }
 	  self._beneficiaryCounter -= 1
+    self._beneficiaryAddressToIndex[addr] = 0
   }
   
   pub fn lock(mut self, ctx: Context) {
@@ -53,7 +59,7 @@ contract Splitter {
 
 		let initBalance: u256 = ctx.balance_of(ctx.self_address())
 
-		let i: u256 = 0
+		let mut i: u256 = 0
 		while i<self._beneficiaryCounter {
 			ctx.send_value(to: self._beneficiaries[i].addr, wei: self._beneficiaries[i].share*initBalance/self._shareSum)
       i+=1
@@ -78,10 +84,13 @@ contract Splitter {
   }
 
   pub fn checkIfEqualSplit(self) -> bool {
-		let mut i: u256 = 1
+    if self._beneficiaryCounter==1{
+      return true
+    }
+		let mut i: u256 = 0
 		let mut equalFlag: bool = true
-		while i<=self._beneficiaryCounter and equalFlag==true {
-			if self._beneficiaries[i].share != self._beneficiaries[i-1].share{
+		while i<self._beneficiaryCounter and equalFlag==true {
+			if self._beneficiaries[i].share != self._beneficiaries[i+1].share{
         equalFlag = false
       }
 			i+=1
@@ -89,6 +98,12 @@ contract Splitter {
 		return equalFlag
   }
 
+  pub fn getNumberBeneficiaries(self) -> u256 {
+    return self._beneficiaryCounter
+  }
+
+  pub fn getIfAddressIsRegistered(self, addr: address) -> bool {
+    return self._beneficiaryAddressToIndex != 0
+  }
 
 }
-

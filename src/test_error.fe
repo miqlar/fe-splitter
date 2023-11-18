@@ -1,6 +1,6 @@
 
 contract Test {
-  pub fn get_42() -> u256 {
+  pub fn get_42(self) -> u256 {
       return 42
   }
 }
