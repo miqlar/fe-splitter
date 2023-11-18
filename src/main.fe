@@ -1,15 +1,67 @@
-// Import `get_42` from the utils module and rename it to `get_42_util`.
-use utils::get_42 as get_42_util
+use erc20_token::ERC20
 
-contract Main {
-    pub fn get_42(self) -> u256 {
-        return get_42_util()
-    }
+
+struct Beneficiary {
+    pub addr: address
+    pub share: u256
 }
 
-#test
-fn test_main(mut ctx: Context) {
-    // Create a new `Main` contract via `ctx` and test that `get_42` return 42.
-    let main: Main = Main.create(ctx, 0)
-    assert main.get_42() == 42
+
+contract Splitter {
+
+  addresses: Map<u256, address>
+  addressCounter: u256
+  addresses2: Map<u256, Beneficiary>
+  shareSum: u256
+
+  _locked: bool
+
+  pub fn addAddress(mut self, ctx: Context, addr: address) {
+      self.addresses[self.addressCounter] = addr
+      self.addressCounter += 1
+      self.addresses2[self.addressCounter] = Beneficiary(addr:addr, share:1)
+      self.shareSum+=10
+  }
+
+  pub fn removeAddress(mut self, ctx: Context, i: u256) {
+      assert i>self.addressCounter
+      if i!=self.addressCounter{
+        let lastAddress: address = self.addresses[self.addressCounter]
+        self.addresses[i] = lastAddress
+      }
+      self.addressCounter -= 1
+  }
+  
+  pub fn splitBalance(mut self, mut ctx: Context) {
+        let initBalance: u256 = ctx.balance_of(ctx.self_address())
+
+        let i: u256 = 0
+        while i<self.addressCounter {
+            ctx.send_value(to: self.addresses2[i].addr, wei: self.addresses2[i].share*initBalance/self.shareSum)
+        }
+        ctx.send_value(to: self.addresses[i], wei: ctx.balance_of(ctx.self_address()))
+  }
+
+  pub fn splitTokensBalance(mut self, mut ctx: Context, tokenAddress: address) {
+        let mut token:ERC20 = ERC20(tokenAddress)
+        let initTokens: u256 = token.balanceOf(ctx.self_address())
+
+        let mut i: u256 = 0
+        while i<self.addressCounter {
+            token.transfer(ctx, recipient: self.addresses2[i].addr, value:self.addresses2[i].share * initTokens/self.shareSum)
+            i+=1
+        }
+        token.transfer(ctx, recipient: self.addresses[i], value: token.balanceOf(ctx.self_address()))
+  }
+
+  pub fn checkIfEqualSplit(self) -> bool {
+        let mut i: u256 = 1
+        let mut equalFlag: bool = true
+        while i<=self.addressCounter and equalFlag==true {
+            assert self.addresses2[i].share == self.addresses2[i-1].share
+            i+=1
+        }
+        return equalFlag
+  }
+
 }
