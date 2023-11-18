@@ -1,67 +1,62 @@
 use erc20_token::ERC20
 
-
 struct Beneficiary {
-    pub addr: address
-    pub share: u256
+	pub addr: address
+	pub share: u256
 }
-
 
 contract Splitter {
 
-  addresses: Map<u256, address>
+  addresses: Map<u256, Beneficiary>
   addressCounter: u256
-  addresses2: Map<u256, Beneficiary>
   shareSum: u256
-
   _locked: bool
 
-  pub fn addAddress(mut self, ctx: Context, addr: address) {
-      self.addresses[self.addressCounter] = addr
-      self.addressCounter += 1
-      self.addresses2[self.addressCounter] = Beneficiary(addr:addr, share:1)
-      self.shareSum+=10
+  pub fn addAddress(mut self, ctx: Context, addr: address, share: u256) {
+	  self.addressCounter += 1
+	  self.addresses[self.addressCounter] = Beneficiary(addr:addr, share:share)
+	  self.shareSum+=share
   }
 
   pub fn removeAddress(mut self, ctx: Context, i: u256) {
-      assert i>self.addressCounter
-      if i!=self.addressCounter{
-        let lastAddress: address = self.addresses[self.addressCounter]
-        self.addresses[i] = lastAddress
-      }
-      self.addressCounter -= 1
+	  assert i>self.addressCounter
+	  if i!=self.addressCounter{
+		let lastAddress: Beneficiary = self.addresses[self.addressCounter].to_mem()
+		self.addresses[i] = lastAddress
+	  }
+	  self.addressCounter -= 1
   }
   
   pub fn splitBalance(mut self, mut ctx: Context) {
-        let initBalance: u256 = ctx.balance_of(ctx.self_address())
+		let initBalance: u256 = ctx.balance_of(ctx.self_address())
 
-        let i: u256 = 0
-        while i<self.addressCounter {
-            ctx.send_value(to: self.addresses2[i].addr, wei: self.addresses2[i].share*initBalance/self.shareSum)
-        }
-        ctx.send_value(to: self.addresses[i], wei: ctx.balance_of(ctx.self_address()))
+		let i: u256 = 0
+		while i<self.addressCounter {
+			ctx.send_value(to: self.addresses[i].addr, wei: self.addresses[i].share*initBalance/self.shareSum)
+		}
+		ctx.send_value(to: self.addresses[i].addr, wei: ctx.balance_of(ctx.self_address()))
   }
 
   pub fn splitTokensBalance(mut self, mut ctx: Context, tokenAddress: address) {
-        let mut token:ERC20 = ERC20(tokenAddress)
-        let initTokens: u256 = token.balanceOf(ctx.self_address())
+		let mut token:ERC20 = ERC20(tokenAddress)
+		let initTokens: u256 = token.balanceOf(ctx.self_address())
 
-        let mut i: u256 = 0
-        while i<self.addressCounter {
-            token.transfer(ctx, recipient: self.addresses2[i].addr, value:self.addresses2[i].share * initTokens/self.shareSum)
-            i+=1
-        }
-        token.transfer(ctx, recipient: self.addresses[i], value: token.balanceOf(ctx.self_address()))
+		let mut i: u256 = 0
+		while i<self.addressCounter {
+			token.transfer(ctx, recipient: self.addresses[i].addr, value:self.addresses[i].share * initTokens/self.shareSum)
+			i+=1
+		}
+		token.transfer(ctx, recipient: self.addresses[i].addr, value: token.balanceOf(ctx.self_address()))
   }
 
   pub fn checkIfEqualSplit(self) -> bool {
-        let mut i: u256 = 1
-        let mut equalFlag: bool = true
-        while i<=self.addressCounter and equalFlag==true {
-            assert self.addresses2[i].share == self.addresses2[i-1].share
-            i+=1
-        }
-        return equalFlag
+		let mut i: u256 = 1
+		let mut equalFlag: bool = true
+		while i<=self.addressCounter and equalFlag==true {
+			assert self.addresses[i].share == self.addresses[i-1].share
+			i+=1
+		}
+		return equalFlag
   }
 
 }
