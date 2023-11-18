@@ -33,6 +33,14 @@ contract Splitter {
 	  self._shareSum+=share
   }
 
+  pub fn updateShareForAddress(mut self, ctx: Context, addr:address, newShare:u256){
+    assert ctx.msg_sender() == self._owner
+    assert not self._locked
+	  assert self._beneficiaryAddressToIndex[addr] != 0 
+
+    self._beneficiaries[self._beneficiaryAddressToIndex[addr]].share = newShare
+  }
+
   pub fn removeAddress(mut self, ctx: Context, addr: address) {
     assert ctx.msg_sender() == self._owner
     assert not self._locked
