@@ -15,7 +15,7 @@ contract Splitter {
   _lockUntilTimestamp: u256
   _owner: address
 
-  pub fn __init__(mut self, mut ctx: Context, onlySplitAfterLocked: bool, lockUntilTimestamp:u256) {
+  pub fn __init__(mut self, mut ctx: Context, onlySplitAfterLocked: bool, lockUntilTimestamp: u256) {
     self._owner = ctx.msg_sender()
     self._onlySplitAfterLocked = onlySplitAfterLocked
     self._lockUntilTimestamp = lockUntilTimestamp
@@ -56,6 +56,7 @@ contract Splitter {
 		let i: u256 = 0
 		while i<self._beneficiaryCounter {
 			ctx.send_value(to: self._beneficiaries[i].addr, wei: self._beneficiaries[i].share*initBalance/self._shareSum)
+      i+=1
 		}
 		ctx.send_value(to: self._beneficiaries[i].addr, wei: ctx.balance_of(ctx.self_address()))
   }
@@ -70,7 +71,7 @@ contract Splitter {
 
 		let mut i: u256 = 0
 		while i<self._beneficiaryCounter {
-			token.transfer(ctx, recipient: self._beneficiaries[i].addr, value:self._beneficiaries[i].share * initTokens/self._shareSum)
+			token.transfer(ctx, recipient: self._beneficiaries[i].addr, value:self._beneficiaries[i].share * initTokens / self._shareSum)
 			i+=1
 		}
 		token.transfer(ctx, recipient: self._beneficiaries[i].addr, value: token.balanceOf(ctx.self_address()))
@@ -80,7 +81,9 @@ contract Splitter {
 		let mut i: u256 = 1
 		let mut equalFlag: bool = true
 		while i<=self._beneficiaryCounter and equalFlag==true {
-			assert self._beneficiaries[i].share == self._beneficiaries[i-1].share
+			if self._beneficiaries[i].share != self._beneficiaries[i-1].share{
+        equalFlag = false
+      }
 			i+=1
 		}
 		return equalFlag
