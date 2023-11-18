@@ -6,6 +6,10 @@
       {
         "name": "onlySplitAfterLocked",
         "type": "bool"
+      },
+      {
+        "name": "timestampLock",
+        "type": "uint256"
       }
     ],
     "outputs": [],
@@ -36,6 +40,13 @@
         "type": "uint256"
       }
     ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "lock",
+    "inputs": [],
     "outputs": [],
     "stateMutability": "payable"
   },
