@@ -12,13 +12,13 @@ contract Splitter {
   _shareSum: u256
   _locked: bool
   _onlySplitAfterLocked: bool
-  _timestampLock: u256
+  _lockUntilTimestamp: u256
   _owner: address
 
-  pub fn __init__(mut self, mut ctx: Context, onlySplitAfterLocked: bool, timestampLock:u256) {
+  pub fn __init__(mut self, mut ctx: Context, onlySplitAfterLocked: bool, lockUntilTimestamp:u256) {
     self._onlySplitAfterLocked = onlySplitAfterLocked
     self._owner = ctx.msg_sender()
-    self._timestampLock = timestampLock
+    self._lockUntilTimestamp = lockUntilTimestamp
   }
 
   pub fn addAddress(mut self, ctx: Context, addr: address, share: u256) {
@@ -49,7 +49,7 @@ contract Splitter {
 
   pub fn splitBalance(mut self, mut ctx: Context) {
     assert (self._onlySplitAfterLocked and self._locked) or (not self._onlySplitAfterLocked)
-    assert self._timestampLock < ctx.block_timestamp()
+    assert self._lockUntilTimestamp < ctx.block_timestamp()
 
 		let initBalance: u256 = ctx.balance_of(ctx.self_address())
 
@@ -63,7 +63,7 @@ contract Splitter {
 
   pub fn splitTokensBalance(mut self, mut ctx: Context, tokenAddress: address) {
     assert (self._onlySplitAfterLocked and self._locked) or (not self._onlySplitAfterLocked)
-    assert self._timestampLock < ctx.block_timestamp()
+    assert self._lockUntilTimestamp < ctx.block_timestamp()
 
 		let mut token:ERC20 = ERC20(tokenAddress)
 		let initTokens: u256 = token.balanceOf(ctx.self_address())
