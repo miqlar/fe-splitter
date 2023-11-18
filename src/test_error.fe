@@ -1,0 +1,11 @@
+
+contract Test {
+  pub fn get_42() -> u256 {
+      return 42
+  }
+}
+
+fn test_contract(mut ctx: Context) {
+    let test: Test = Test.create(ctx, 0)
+    assert test.get_42() == 42
+}

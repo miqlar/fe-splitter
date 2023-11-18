@@ -16,8 +16,8 @@ contract Splitter {
   _owner: address
 
   pub fn __init__(mut self, mut ctx: Context, onlySplitAfterLocked: bool, lockUntilTimestamp:u256) {
-    self._onlySplitAfterLocked = onlySplitAfterLocked
     self._owner = ctx.msg_sender()
+    self._onlySplitAfterLocked = onlySplitAfterLocked
     self._lockUntilTimestamp = lockUntilTimestamp
   }
 
@@ -76,7 +76,6 @@ contract Splitter {
 		token.transfer(ctx, recipient: self._beneficiaries[i].addr, value: token.balanceOf(ctx.self_address()))
   }
 
-
   pub fn checkIfEqualSplit(self) -> bool {
 		let mut i: u256 = 1
 		let mut equalFlag: bool = true
@@ -86,4 +85,7 @@ contract Splitter {
 		}
 		return equalFlag
   }
+
+
 }
+
